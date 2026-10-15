@@ -13,8 +13,11 @@ An analysis of the [Criteo Uplift dataset](https://huggingface.co/datasets/crite
 | Lift in visits | **+27.1%** (95% CI +26.2% to +28.0%) |
 | Are the groups comparable on the 12 features? | **No.** All 12 differ at Bonferroni p < 0.05 (largest \|z\| 67), and the features predict treatment with AUC 0.508, about 10 standard errors above chance |
 | Can CUPED / CUPAC shorten the test? | Not on this data. Adjusting for the features moved the conversion lift by about 7 standard errors, which a valid adjustment should not do, so the variance reduction cannot be claimed as a sample saving |
-| Do uplift models beat targeting likely buyers (conversions)? | **No.** T-learner: 8 points worse at the top 10% (paired bootstrap CI -13 to -3). Transformed outcome: no difference (0 points, CI -4 to +3) |
-| What should an advertiser do? | Target the top 10% by purchase propensity: it captures 76% of incremental conversions (CI 72% to 80%) at 7.6x lower cost per incremental conversion than targeting everyone, assuming equal cost per user |
+| Do uplift models beat targeting likely buyers on **visits**? | **Yes, at shallow depths.** Transformed-outcome uplift captures 12 more points of incremental visits in the top 10% (paired bootstrap CI +9 to +15); Qini area +0.031 (CI +0.006 to +0.053) |
+| ...and on **conversions**? | **No.** T-learner: 8 points worse at the top 10% (CI -13 to -3). Transformed outcome: no difference (0 points, CI -4 to +3) |
+| Does checking results early break the test? | **Yes, badly.** In 300 A/A replays (labels shuffled, true effect zero), stopping at the first p < 0.05 across 30 checks gave **38.3% (visits) and 40.0% (conversions) false positives** instead of 5%. An always-valid mSPRT held 1.7% and 2.0% |
+| How early can a valid test stop? | mSPRT stopped on the real visit lift after 34,859 users (**0.2%** of the sample) with the effect almost exactly right (+0.01032 vs +0.01034 at full sample). On conversions it stopped after 121,521 users (0.9%) but overstated the effect (+0.00158 vs +0.00115), the usual cost of stopping early on a rare outcome |
+| What should an advertiser do? | For traffic, rank by uplift. For conversions, target the top 10% by purchase propensity: it captures 76% of incremental conversions (CI 72% to 80%) at 7.6x lower cost per incremental conversion than targeting everyone, assuming equal cost per user |
 
 Full reports: [`results/conversion/report.md`](results/conversion/report.md) and [`results/visit/report.md`](results/visit/report.md).
 
@@ -37,6 +40,18 @@ raw intent-to-treat lift is reported as the headline and the adjusted estimates 
    held-out 30%, compared with Qini curves and a paired Poisson bootstrap (the same resamples for every strategy).
 5. **Decision:** incremental outcomes and cost per incremental outcome at the top 10/20/30/50/100%.
    Cost uses an assumed CPM (`--cpm`), stated as an assumption.
+
+## Sequential testing: what early peeking costs (`sequential.py`)
+Experiment owners often check results daily and stop at the first significant result. `sequential.py`
+replays the Criteo data in random arrival order with 30 looks and compares three rules:
+naive peeking (stop at the first p < 0.05), a fixed-horizon test (one look at the end), and an
+always-valid mSPRT (Johari et al., 2017) whose false-positive rate holds under continuous monitoring.
+A/A replays (treatment labels shuffled, so the true effect is zero) measure false positives; the real
+data shows how early the valid test can stop. Results: [`results/sequential/report.md`](results/sequential/report.md).
+
+```bash
+python sequential.py --data criteo-research-uplift-v2.1.csv.gz --out results/sequential
+```
 
 ## Run
 ```bash
