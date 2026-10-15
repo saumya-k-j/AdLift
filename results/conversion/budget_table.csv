@@ -1,0 +1,16 @@
+strategy,target_top,incremental_conversions_per_1M_users,cost_per_incremental_conversion_usd
+likely buyers (response model),10%,746.6,0.67
+likely buyers (response model),20%,848.5,1.18
+likely buyers (response model),30%,907.0,1.65
+likely buyers (response model),50%,948.8,2.63
+likely buyers (response model),100%,978.9,5.11
+uplift: T-learner,10%,668.1,0.75
+uplift: T-learner,20%,771.8,1.3
+uplift: T-learner,30%,816.7,1.84
+uplift: T-learner,50%,854.5,2.93
+uplift: T-learner,100%,978.9,5.11
+uplift: transformed outcome,10%,745.2,0.67
+uplift: transformed outcome,20%,835.9,1.2
+uplift: transformed outcome,30%,870.9,1.72
+uplift: transformed outcome,50%,905.0,2.76
+uplift: transformed outcome,100%,978.9,5.11
